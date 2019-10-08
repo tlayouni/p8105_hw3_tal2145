@@ -1,0 +1,17 @@
+---
+title: "p8105_hw3_tal2145"
+author: Troy Layouni
+date: 2019-10-08
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Loading packages 
+
+```{r}
+library(tidyverse)
+```
+
