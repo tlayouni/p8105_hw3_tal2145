@@ -32,36 +32,49 @@ data("instacart")
 instacart_aisles = 
   instacart %>% 
   group_by(aisle) %>% 
-  summarize(count = n()) %>% 
-  arrange(desc(count)) 
+  summarize(n = n()) %>% 
+  arrange(desc(n)) 
 
 instacart_aisles
 ```
 
 There are 134 aisles in the instacart dataset and the aisle that the most items are ordered from is the fresh vegetables. 
 
-**Problem 1, Part 3: Plotting the number of items ordered in each aisle, limited to aisles with more than 100000 items ordered**
+**Problem 1, Part 3: Plotting the number of items ordered in each aisle, limited to aisles with more than 10,000 items ordered**
 
 ```{r}
 instacart_aisles %>% 
-  filter(count > 10000) %>% 
+  filter(n > 10000) %>% 
   
-ggplot(aes(x = aisle, y = count)) +
+ggplot(aes(x = aisle, y = n)) +
   geom_col() + 
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
   labs(
-   title = "Number of Items order by Aisle",
+   title = "Number of Items Ordered by Aisle",
    x = "Aisle",
    y = "Number of Items Ordered",
    caption = "Data from Instacart"
-  ) +
-  viridis::scale_color_viridis(
-    name = "aisle", 
-    discrete = TRUE
-)
-
+  ) 
 ```
-    
+
+**Problem 1, Part 4: Creating a table to show the 3 most popular items from each table**
+
+```{r}
+  instacart %>% 
+  group_by(aisle, product_name) %>% 
+  filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) %>% 
+  summarize(n = n()) %>%
+  top_n(n = 3) %>% 
+  arrange(desc(n)) %>% 
+  knitr::kable(caption = "3 Most Popular Items by Aisle")
+```
+
+
+
+
+
+
+   
 
 
 
