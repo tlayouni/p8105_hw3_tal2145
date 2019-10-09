@@ -9,9 +9,60 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Loading packages 
+**Loading packages**
 
 ```{r}
 library(tidyverse)
+library(ggridges)
 ```
+
+## Problem 1
+
+**Problem 1, Part 1: Loading Instacart data**
+
+```{r}
+library(p8105.datasets)
+data("instacart")
+```
+
+
+**Problem 1, Part 2: Number of aisles and the aisle with the most items ordered**
+
+```{r}
+instacart_aisles = 
+  instacart %>% 
+  group_by(aisle) %>% 
+  summarize(count = n()) %>% 
+  arrange(desc(count)) 
+
+instacart_aisles
+```
+
+There are 134 aisles in the instacart dataset and the aisle that the most items are ordered from is the fresh vegetables. 
+
+**Problem 1, Part 3: Plotting the number of items ordered in each aisle, limited to aisles with more than 100000 items ordered**
+
+```{r}
+instacart_aisles %>% 
+  filter(count > 10000) %>% 
+  
+ggplot(aes(x = aisle, y = count)) +
+  geom_col() + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+  labs(
+   title = "Number of Items order by Aisle",
+   x = "Aisle",
+   y = "Number of Items Ordered",
+   caption = "Data from Instacart"
+  ) +
+  viridis::scale_color_viridis(
+    name = "aisle", 
+    discrete = TRUE
+)
+
+```
+    
+
+
+
 
