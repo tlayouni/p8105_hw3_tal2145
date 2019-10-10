@@ -45,6 +45,7 @@ There are 134 aisles in the instacart dataset and the aisle that the most items 
 ```{r}
 instacart_aisles %>% 
   filter(n > 10000) %>% 
+  mutate(aisle = reorder(aisle, n)) %>% 
   
 ggplot(aes(x = aisle, y = n)) +
   geom_col() + 
@@ -61,11 +62,14 @@ ggplot(aes(x = aisle, y = n)) +
 
 ```{r}
   instacart %>% 
-  group_by(aisle, product_name) %>% 
-  filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) %>% 
+  group_by(product_name, aisle) %>% 
   summarize(n = n()) %>%
-  top_n(n = 3) %>% 
-  arrange(desc(n)) %>% 
+  #arrange(desc(n)) %>% 
+  #top_n(n = 3) %>% 
+  group_by(aisle) %>% 
+  filter(
+    aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits"), min_rank(desc(n)) < 4) %>% 
+  arrange(n, aisle) %>% 
   knitr::kable(caption = "3 Most Popular Items by Aisle")
 ```
 
@@ -74,35 +78,60 @@ ggplot(aes(x = aisle, y = n)) +
 ```{r}
 instacart %>% 
     mutate(order_dow = recode(order_dow, "0" = "Sunday", "1" = "Monday", "2" = "Tuesday", "3" = "Wednesday", "4" = "Thursday", "5" = "Friday", "6" = "Saturday")) %>% 
-  select(product_name, order_hour_of_day, order_dow) %>% 
   group_by(product_name, order_dow) %>%
   filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) %>% 
-  mutate(mean_hour = round(mean(order_hour_of_day))) %>% 
+  mutate(mean_hour = mean(order_hour_of_day)) %>% 
   select(product_name, order_dow, mean_hour) %>% 
   distinct() %>% 
   pivot_wider(
     names_from = "order_dow",
-    values_from = c("mean_hour")) %>% 
+    values_from = c("mean_hour")
+  ) %>% 
   select(product_name, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday) %>% 
-  knitr::kable(caption = "Mean Hour of Day Products are Bought by Day of week")
+  knitr::kable(caption = "Instacart: Mean Hour Products are Bought by Day of Week")
 ```
 
+## Problem 2
 
-#mutate(order_dow = recode(order_dow, "0" = "Sunday", "1" = "Monday", "2" = "Tuesday", "3" = "Wednesday", "4" = "Thursday", "5" = "Friday", "6" = "Saturday")) %>%
-  group_by(product_name, order_dow) %>% 
-  filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) %>% 
-  mutate(
-    mean_hour = mean(order_hour_of_day)) %>%
-    #mean_hour_apple = mean(filter(product_name %in% "Pink Lady Apples"), order_hour_of_day),
-    #mean_hour_ice_cream = mean(filter(product_name %in% "Coffee Ice Cream"), order_hour_of_day)
- # ) %>% 
-  select(product_name, order_dow, mean_hour)  %>%
-  pivot_wider(
-    names_from = "order_dow",
-    values_from = c("mean_hour"),
-    values_fn = list(mean_hour = list)
-  ) %>% 
+**Problem 2, Part 1: Loading data and data cleaning**
 
+* Loading BRFSS from the `p8105.datasets` package
+* Cleaning by: 
+  * Formating to appropriate variable names
+  * Focusing on the "Overall Health" topic
+  * Including only responses from "Excellent" to "Poor"
+  * Organizing responses as a factor taking levels ordered from "Poor" to "Excellent"
+  
+```{r}
+library(p8105.datasets)
+data("brfss_smart2010")
+
+brfss_smart2010 =
+  brfss_smart2010 %>% 
+  janitor::clean_names() %>% 
+  filter(topic == "Overall Health") 
+
+brfss_smart2010 %>%  
+  group_by(response) %>% 
+  summarize(
+    n_response = n()
+  )
+  
+```
+
+library(p8105.datasets)
+data("brfss_smart2010")
+
+
+  brfss_smart2010 = 
+  janitor::clean_names() %>% 
+  filter(topic == "Overall Health") %>% 
+  group_by(response) %>% 
+  summarize(
+    n_question = n(response)
+  )
+  # mutate(response = as.factor(response)) %>%
+  as.factor(response, levels =  c(""))
 
 
    
