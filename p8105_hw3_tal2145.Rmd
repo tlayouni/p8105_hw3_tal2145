@@ -132,19 +132,19 @@ brfss_smart2010 =
 **Problem 2, part 2: States with 7 or more locations**
 
 ```{r}
-
-
+brfss_smart2010 %>% 
+  filter(year == 2002) %>% 
+  group_by(locationabbr) %>% 
+  distinct(locationdesc) %>% 
+  count(locationabbr, name = "n_locations") %>% 
+  filter(n_locations > 6)
 ```
 
+Problem 2, part 3: Constructing a new data set 
+* Filtered to only include responses of "Excellent" 
+* Selecting variables year and state 
+* Creating a variable for the averages og the data_value across locations within a state 
 
-
-
-
-summarize(pull(group_by(location),filter(brfss_smart2010, year == 2002, ), state))
-
-filter to 2002 
-group by location 
-report 
    
 
 
