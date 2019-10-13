@@ -179,12 +179,32 @@ state_value_data %>%
 ggplot(aes(x = year, y = state_value_mean, color = locationabbr)) +
   geom_line() +
     labs(
-   title = "Mean data value by State Over Time",
+   title = "Mean Data Value by State",
    x = "Year",
    y = "Mean Data Value",
    caption = "Data from BRFSS"
   ) 
 ```
+
+**Problem 2, part 3: Making a two-panel plot showing the years 2006 and 2010 distribution of data_vlaue for responses "Poor" to "Excellent" among locations in New York**
+
+```{r}
+brfss_smart2010 %>% 
+  filter(year %in% c("2006", "2010"), locationabbr == "NY") %>%
+  group_by(locationdesc, response) %>% 
+  
+  ggplot(aes(x = response, y = data_value, fill = locationdesc)) +
+  geom_col() + 
+  facet_grid(~year) +
+  viridis::scale_fill_viridis(discrete = TRUE) +
+      labs(
+   title = "Data Value by Response in all New York Locations: 2006 and 2010",
+   x = "Response",
+   y = "Data Value",
+   caption = "Data from BRFSS"
+  ) 
+```
+
 
 
    
