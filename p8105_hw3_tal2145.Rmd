@@ -15,6 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(ggridges)
 library(viridis)
+library(lubridate)
 
 knitr::opts_chunk$set(
 	echo = TRUE,
@@ -252,7 +253,21 @@ accelerometer_data %>%
 
 ```
 
-   
+
+**Problem 3, part 3: Producing a single-panel plot to show activity per day, color coded by day of week 
+
+```{r}
+accelerometer_data %>% 
+  mutate(hour = floor(minute/60)) %>% 
+  group_by(day, week, hour) %>% 
+  mutate(hourly_activity = sum(activity_count)) %>% 
+  distinct(day, week, hour, hourly_activity) %>% 
+  
+  
+  ggplot(aes(x = hour, y = hourly_activity, color = day)) + 
+    geom_point()
+```
+
 
 
 
