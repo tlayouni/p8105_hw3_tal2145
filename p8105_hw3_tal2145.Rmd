@@ -205,7 +205,29 @@ brfss_smart2010 %>%
   ) 
 ```
 
+## Problem 3
 
+**Problem 3, part 1: Tidying accelerometer data 
+
+```{r}
+accelerometer_data = 
+read_csv(file = "./data/accel_data.csv") %>%
+  janitor::clean_names() %>% 
+  pivot_longer(
+    cols = starts_with("activity"),
+    names_to = "minute",
+    values_to = "activity_count",
+    names_prefix = "activity_"
+  ) %>% 
+  mutate(minute = as.integer(minute),
+         day_type = case_when(
+           day %in% c("Saturday", "Sunday") ~ "weekend",
+           day %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday") ~ "weekday",
+           TRUE ~ ""
+   ))
+```
+
+The `accelerometer_data` dataset includes `r ncol(pull(accelerometer_data))`
 
    
 
