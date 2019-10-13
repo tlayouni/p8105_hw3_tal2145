@@ -207,7 +207,11 @@ brfss_smart2010 %>%
 
 ## Problem 3
 
-**Problem 3, part 1: Tidying accelerometer data 
+**Problem 3, part 1: Tidying accelerometer data and summarizing new dataset**
+
+* creating a minute and activity count variable
+* converting minute variable to an integer type 
+* creating a variable for whether a day is a weekend or weekday
 
 ```{r}
 accelerometer_data = 
@@ -223,11 +227,30 @@ read_csv(file = "./data/accel_data.csv") %>%
          day_type = case_when(
            day %in% c("Saturday", "Sunday") ~ "weekend",
            day %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday") ~ "weekday",
-           TRUE ~ ""
+           TRUE ~ "",
    ))
 ```
 
-The `accelerometer_data` dataset includes `r ncol(pull(accelerometer_data))`
+The `accelerometer_data` dataset has `r ncol(accelerometer_data)` columns that include variables for the week, day_id, and day of the week and minute for each observation as well as the activity count at that day and time and whether the observation was on a weekend or weekday. There are `r nrow(accelerometer_data)` rows of observations for every minute of each day the subject was monitored over the 5 weeks. The average activity level over the entire observation period was `r mean(pull(accelerometer_data, activity_count))`. The average activity count on a weekend was `r mean(pull(filter(accelerometer_data, day_type == "weekday"), activity_count)) - mean(pull(filter(accelerometer_data, day_type == "weekend"), activity_count))` less than a weekday. 
+
+**Problem 3, part 2: Creating a table of daily activity**
+
+* Aggregating data across minutes for each day 
+* Creating table for results 
+
+```{r}
+accelerometer_data %>% 
+  group_by(day, week) %>% 
+  mutate(daily_activity = sum(activity_count)) %>% 
+  distinct(week, day, daily_activity) %>% 
+  pivot_wider(
+    names_from = day,
+    values_from = daily_activity
+  ) %>% 
+  select(week, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday) %>% 
+  knitr::kable(caption = "Daily Acitivity by Observation Day")
+
+```
 
    
 
