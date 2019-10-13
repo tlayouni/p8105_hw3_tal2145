@@ -258,14 +258,25 @@ accelerometer_data %>%
 
 ```{r}
 accelerometer_data %>% 
-  mutate(hour = floor(minute/60)) %>% 
-  group_by(day, week, hour) %>% 
-  mutate(hourly_activity = sum(activity_count)) %>% 
-  distinct(day, week, hour, hourly_activity) %>% 
+  #mutate(hour = floor(minute/60)) %>% 
+  #group_by(day, week, hour) %>% 
+  #mutate(hourly_activity = sum(activity_count)) %>% 
+  #distinct(day, week, hour, hourly_activity) %>% 
   
   
-  ggplot(aes(x = hour, y = hourly_activity, color = day)) + 
-    geom_point()
+  ggplot(aes(x = minute, y = activity_count, color = day)) + 
+    geom_point(aes(alpha = .7)) +
+  scale_x_continuous(
+    breaks = c(0, 60, 120, 180, 240, 300, 360, 420, 480, 540, 600, 660, 720, 780, 840, 900, 960, 1020, 1080, 1140, 1200, 1260, 1320, 1380),
+    labels = c("12:00 AM", "1:00 AM", "2:00 AM", "3:00 AM", "4:00 AM", "5:00 AM", "6:00 AM", "7:00 AM", "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM", "10:00 PM", "11:00 PM")
+  ) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+  labs(
+   title = "Activity Level Over 24 Hours",
+   x = "Time",
+   y = "Activity Count",
+   caption = "Data from CUMC"
+  ) 
 ```
 
 
