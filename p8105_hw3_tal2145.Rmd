@@ -140,6 +140,21 @@ brfss_smart2010 %>%
   filter(n_locations > 6)
 ```
 
+In 2002, Connecticut, Florida, Massachusetts, North Carolina, New Jersey and Pennsylvania had at least 7 locations 
+
+
+```{r}
+brfss_smart2010 %>% 
+  filter(year == 2010) %>% 
+  group_by(locationabbr) %>% 
+  distinct(locationdesc) %>% 
+  count(locationabbr, name = "n_locations") %>% 
+  filter(n_locations > 6)
+```
+
+In 2010 far more states had at least 7 locations which included California, Colorado, Florida, Massachusetts, Maryland, North Carolina, Nebraska, New Jersey, New York, Ohio, Pennsylvania,South Carolina, Texas and Washington. 
+
+
 Problem 2, part 3: Constructing a new data set 
 * Filtered to only include responses of "Excellent" 
 * Selecting variables year and state 
