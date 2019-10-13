@@ -158,7 +158,34 @@ In 2010 far more states had at least 7 locations which included California, Colo
 Problem 2, part 3: Constructing a new data set 
 * Filtered to only include responses of "Excellent" 
 * Selecting variables year and state 
-* Creating a variable for the averages og the data_value across locations within a state 
+* Creating a variable for the averages of the `data_value` across locations within a state 
+
+```{r}
+state_value_data = 
+  brfss_smart2010 %>% 
+  filter(response == "Excellent") %>%
+  group_by(locationabbr, year) %>%
+  mutate(state_value_mean = mean(data_value, na.rm = TRUE)) %>% 
+  select(year, locationabbr, state_value_mean) %>% 
+  distinct() 
+```
+
+Constructing a spaghetti plot of average value over time within a state
+
+```{r}
+state_value_data %>% 
+  group_by(locationabbr) %>% 
+  
+ggplot(aes(x = year, y = state_value_mean, color = locationabbr)) +
+  geom_line() +
+    labs(
+   title = "Mean data value by State Over Time",
+   x = "Year",
+   y = "Mean Data Value",
+   caption = "Data from BRFSS"
+  ) 
+```
+
 
    
 
