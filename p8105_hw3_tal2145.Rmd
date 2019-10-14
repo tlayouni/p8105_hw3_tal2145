@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 **Loading packages**
 
-```{r}
+```{r load_packages}
 library(tidyverse)
 library(ggridges)
 library(viridis)
@@ -35,36 +35,45 @@ theme_set(theme_minimal() + theme(legend.position = "bottom"))
 
 ## Problem 1
 
-**Problem 1, Part 1: Loading Instacart data**
+**Problem 1, Part 1: Loading Instacart data and exploration**
 
-```{r}
+```{r load_instacart_data}
 library(p8105.datasets)
 data("instacart")
+```
+
+The `instacart` dataset is a dataset with `r ncol(instacart)` columns and `r nrow(instacart)` rows, each indicating a particular item ordered by a customer using instacart. This data includes information from `r nrow(distinct(instacart, user_id))` unique users. The average number of days since a customer's last order is `r mean(pull(distinct(instacart, user_id, .keep_all = TRUE), days_since_prior_order))`
+
+```{r}
+test = 
+  instacart %>% 
+  distinct(user_id, .keep_all = TRUE) %>% 
+  mutate(mean = mean(days_since_prior_order))
 ```
 
 
 **Problem 1, Part 2: Number of aisles and the aisle with the most items ordered**
 
-```{r}
+```{r instacart_aisles}
 instacart_aisles = 
   instacart %>% 
   group_by(aisle) %>% 
-  summarize(n = n()) %>% 
-  arrange(desc(n)) 
+  summarize(n_items_ordered = n()) %>% 
+  arrange(desc(n_items_ordered))
 
 instacart_aisles
 ```
 
-There are 134 aisles in the instacart dataset and the aisle that the most items are ordered from is the fresh vegetables. 
+There are `r nrow(instacart_aisles)` aisles in the instacart dataset and the aisle that the most items are ordered from is the fresh vegetables followed by fresh fruits then packaged vegetables fruits..  
 
 **Problem 1, Part 3: Plotting the number of items ordered in each aisle, limited to aisles with more than 10,000 items ordered**
 
-```{r}
+```{r instacart_plot}
 instacart_aisles %>% 
-  filter(n > 10000) %>% 
-  mutate(aisle = reorder(aisle, n)) %>% 
+  filter(n_items_ordered > 10000) %>% 
+  mutate(aisle = reorder(aisle, n_items_ordered)) %>% 
   
-ggplot(aes(x = aisle, y = n)) +
+ggplot(aes(x = aisle, y = n_items_ordered)) +
   geom_col() + 
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
   labs(
@@ -77,22 +86,20 @@ ggplot(aes(x = aisle, y = n)) +
 
 **Problem 1, Part 4: Creating a table to show the 3 most popular items from each table**
 
-```{r}
+```{r instacart_table}
   instacart %>% 
   group_by(product_name, aisle) %>% 
-  summarize(n = n()) %>%
-  #arrange(desc(n)) %>% 
-  #top_n(n = 3) %>% 
+  summarize(n_items = n()) %>%
   group_by(aisle) %>% 
   filter(
-    aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits"), min_rank(desc(n)) < 4) %>% 
-  arrange(n, aisle) %>% 
+    aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits"), min_rank(desc(n_items)) < 4) %>% 
+  arrange(n_items, aisle) %>% 
   knitr::kable(caption = "3 Most Popular Items by Aisle")
 ```
 
-**Problem 1, Part 5: Creating a table for the mean hour of the day that both Pink Lady Apples and Coffee Ice Cream are ordered each day of the week ** 
+**Problem 1, Part 5: Creating a table for the mean hour of the day that both Pink Lady Apples and Coffee Ice Cream are ordered each day of the week** 
 
-```{r}
+```{r instacart_table_hour}
 instacart %>% 
     mutate(order_dow = recode(order_dow, "0" = "Sunday", "1" = "Monday", "2" = "Tuesday", "3" = "Wednesday", "4" = "Thursday", "5" = "Friday", "6" = "Saturday")) %>% 
   group_by(product_name, order_dow) %>%
@@ -119,65 +126,67 @@ instacart %>%
     * This includes only responses from "Excellent" to "Poor"
   * Organizing responses as a factor taking levels ordered from "Poor" to "Excellent"
   
-```{r}
+```{r load_brfss}
 library(p8105.datasets)
 data("brfss_smart2010")
 
 brfss_smart2010 =
   brfss_smart2010 %>% 
   janitor::clean_names() %>% 
+  rename("state" = "locationabbr", "county" = "locationdesc") %>%
   filter(topic == "Overall Health") %>% 
-  mutate(response = fct_relevel(as.factor(response), c("Poor", "Fair", "Good", "Very good", "Excellent"))) 
+  mutate(response = fct_relevel(as.factor(response), c("Poor", "Fair", "Good", "Very good", "Excellent")))
 ```
 
 **Problem 2, part 2: States with 7 or more locations**
 
-```{r}
+```{r brfss_7_locations}
 brfss_smart2010 %>% 
   filter(year == 2002) %>% 
-  group_by(locationabbr) %>% 
-  distinct(locationdesc) %>% 
-  count(locationabbr, name = "n_locations") %>% 
+  group_by(state) %>% 
+  distinct(county) %>% 
+  count(state, name = "n_locations") %>% 
   filter(n_locations > 6)
 ```
 
 In 2002, Connecticut, Florida, Massachusetts, North Carolina, New Jersey and Pennsylvania had at least 7 locations 
 
 
-```{r}
+```{r brfss_10_locations}
 brfss_smart2010 %>% 
   filter(year == 2010) %>% 
-  group_by(locationabbr) %>% 
-  distinct(locationdesc) %>% 
-  count(locationabbr, name = "n_locations") %>% 
+  group_by(state) %>% 
+  distinct(county) %>% 
+  count(state, name = "n_locations") %>% 
   filter(n_locations > 6)
 ```
 
 In 2010 far more states had at least 7 locations which included California, Colorado, Florida, Massachusetts, Maryland, North Carolina, Nebraska, New Jersey, New York, Ohio, Pennsylvania,South Carolina, Texas and Washington. 
 
 
-Problem 2, part 3: Constructing a new data set 
+**Problem 2, part 3: Constructing a new data set**
+
 * Filtered to only include responses of "Excellent" 
 * Selecting variables year and state 
 * Creating a variable for the averages of the `data_value` across locations within a state 
 
-```{r}
+```{r excellent_data}
 state_value_data = 
   brfss_smart2010 %>% 
   filter(response == "Excellent") %>%
-  group_by(locationabbr, year) %>%
+  group_by(state, year) %>%
   mutate(state_value_mean = mean(data_value, na.rm = TRUE)) %>% 
-  select(year, locationabbr, state_value_mean) %>% 
+  select(year, state, state_value_mean) %>% 
   distinct() 
 ```
 
 Constructing a spaghetti plot of average value over time within a state
 
-```{r}
+```{r brfss_plot_mean}
 state_value_data %>% 
-  group_by(locationabbr) %>% 
+  group_by(state) %>% 
   
-ggplot(aes(x = year, y = state_value_mean, color = locationabbr)) +
+ggplot(aes(x = year, y = state_value_mean, color = state)) +
   geom_line() +
     labs(
    title = "Mean Data Value by State",
@@ -189,13 +198,13 @@ ggplot(aes(x = year, y = state_value_mean, color = locationabbr)) +
 
 **Problem 2, part 3: Making a two-panel plot showing the years 2006 and 2010 distribution of data_vlaue for responses "Poor" to "Excellent" among locations in New York**
 
-```{r}
+```{r brfss_plot_ny}
 brfss_smart2010 %>% 
-  filter(year %in% c("2006", "2010"), locationabbr == "NY") %>%
-  group_by(locationdesc, response) %>% 
+  filter(year %in% c("2006", "2010"), state == "NY") %>%
+  group_by(county, response) %>% 
   
-  ggplot(aes(x = response, y = data_value, fill = locationdesc)) +
-  geom_col() + 
+  ggplot(aes(x = response, y = data_value, color = response)) +
+  geom_boxplot() + 
   facet_grid(~year) +
   viridis::scale_fill_viridis(discrete = TRUE) +
       labs(
@@ -214,7 +223,7 @@ brfss_smart2010 %>%
 * converting minute variable to an integer type 
 * creating a variable for whether a day is a weekend or weekday
 
-```{r}
+```{r load_accelerometer}
 accelerometer_data = 
 read_csv(file = "./data/accel_data.csv") %>%
   janitor::clean_names() %>% 
@@ -239,7 +248,7 @@ The `accelerometer_data` dataset has `r ncol(accelerometer_data)` columns that i
 * Aggregating data across minutes for each day 
 * Creating table for results 
 
-```{r}
+```{r accelerometer_table}
 accelerometer_data %>% 
   group_by(day, week) %>% 
   mutate(daily_activity = sum(activity_count)) %>% 
@@ -250,22 +259,16 @@ accelerometer_data %>%
   ) %>% 
   select(week, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday) %>% 
   knitr::kable(caption = "Daily Acitivity by Observation Day")
-
 ```
 
 
 **Problem 3, part 3: Producing a single-panel plot to show activity per day, color coded by day of week 
 
-```{r}
+```{r accelerometer_plot}
 accelerometer_data %>% 
-  #mutate(hour = floor(minute/60)) %>% 
-  #group_by(day, week, hour) %>% 
-  #mutate(hourly_activity = sum(activity_count)) %>% 
-  #distinct(day, week, hour, hourly_activity) %>% 
   
-  
-  ggplot(aes(x = minute, y = activity_count, color = day)) + 
-    geom_point(aes(alpha = .7)) +
+   ggplot(aes(x = minute, y = activity_count, color = day)) + 
+    geom_point(aes(alpha = .3)) +
   scale_x_continuous(
     breaks = c(0, 60, 120, 180, 240, 300, 360, 420, 480, 540, 600, 660, 720, 780, 840, 900, 960, 1020, 1080, 1140, 1200, 1260, 1320, 1380),
     labels = c("12:00 AM", "1:00 AM", "2:00 AM", "3:00 AM", "4:00 AM", "5:00 AM", "6:00 AM", "7:00 AM", "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM", "10:00 PM", "11:00 PM")
