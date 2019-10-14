@@ -42,15 +42,7 @@ library(p8105.datasets)
 data("instacart")
 ```
 
-The `instacart` dataset is a dataset with `r ncol(instacart)` columns and `r nrow(instacart)` rows, each indicating a particular item ordered by a customer using instacart. This data includes information from `r nrow(distinct(instacart, user_id))` unique users. The average number of days since a customer's last order is `r mean(pull(distinct(instacart, user_id, .keep_all = TRUE), days_since_prior_order))`
-
-```{r}
-test = 
-  instacart %>% 
-  distinct(user_id, .keep_all = TRUE) %>% 
-  mutate(mean = mean(days_since_prior_order))
-```
-
+The `instacart` dataset is a dataset with `r ncol(instacart)` columns and `r nrow(instacart)` rows, each indicating a particular item ordered by a customer using instacart. This data includes information from `r nrow(distinct(instacart, user_id))` unique users and includes variables on the day of week an order was made (`order_dow`), hour of the day the order was placed (`order_hour_of_day`), the order sequence of items, and the aisle and department each ordered item is located in. Among customers who have placed prior orders, the average number of days since a customer's last order is `r mean(pull(distinct(instacart, user_id, .keep_all = TRUE), days_since_prior_order))` days but this variable was capped at 30 days. The department with the most items ordered was `r names(which.max(table(pull(instacart, department))))` and avocados were ordered a total of `r nrow(filter(instacart, product_name == "Organic Hass Avocado"))` times. 
 
 **Problem 1, Part 2: Number of aisles and the aisle with the most items ordered**
 
@@ -64,7 +56,7 @@ instacart_aisles =
 instacart_aisles
 ```
 
-There are `r nrow(instacart_aisles)` aisles in the instacart dataset and the aisle that the most items are ordered from is the fresh vegetables followed by fresh fruits then packaged vegetables fruits..  
+There are `r nrow(distinct(instacart, aisle))` aisles in the instacart dataset and the aisle that the most items are ordered from is the `r names(which.max(table(pull(instacart, aisle))))` followed by fresh fruits then packaged vegetables fruits.  
 
 **Problem 1, Part 3: Plotting the number of items ordered in each aisle, limited to aisles with more than 10,000 items ordered**
 
